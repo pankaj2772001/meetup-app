@@ -109,12 +109,16 @@ const EventSchema = new mongoose.Schema({
   dresscode: {
 
     type: String,
+    default: "Casual",
+    required: true
 
   },
 
   ageRestriction: {
 
     type: String,
+    default: "None",
+    required: true
 
   },
 
