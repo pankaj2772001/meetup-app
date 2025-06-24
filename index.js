@@ -13,7 +13,7 @@ app.use(express.json())
 const cors = require('cors')
 
 const corsOptions = {
-    origin: "*",
+    origin: "https://meetup-app-frontend-sepia.vercel.app",
     credentials: true,
     optionSuccessStatus: 200
 }
@@ -27,19 +27,23 @@ const Event = require("./models/event.model")
 const Speaker = require("./models/speaker.model")
 
 
-const speaker = {
-    "name": "Olivia Brooks",
-    "designation": "author",
-    "profileImageUrl": "https://drive.google.com/file/d/1OikmgYP-0EPmA7q4sLoYcVyVpyf8kLf8/view?usp=sharing"
-  }
+// const speaker = 
+//     {
+//     "name": "James Liu",
+//     "designation": "cto",
+//     "profileImageUrl": "https://example.com/images/speakers/james-liu.jpg"
+//   }
 
-async function createSpeaker(){
+
+async function createSpeaker(newspeaker){
 
     try {
         
-        const newSpeaker = new Speaker(speaker)
+        const newSpeaker = new Speaker(newspeaker)
 
         await newSpeaker.save()
+
+        return newSpeaker
     } catch (error) {
         
         console.log("Failed to add speaker", error)
@@ -50,26 +54,52 @@ async function createSpeaker(){
 
 // createSpeaker()
 
-const event = {
-    "title": "Book Writing Bootcamp",
-    "eventType": "Online",
-    "eventTags": ["books", "writing", "education"],
-    "description": "Unlock your inner author in this intense bootcamp.",
-    "price": 35,
-    "startDateAndTime": "July 18, 2025, 1:00 PM",
-    "endDateAndTime": "July 18, 2025, 3:30 PM",
-    "eventHosted": "Writers Guild",
-    "eventImageUrl": "https://drive.google.com/file/d/1RpmlRNJLKd5OOjefs0_p1nkW8_FfGv_p/view?usp=sharing",
-    "speaker": ["68544ac8252a31db0a8c99da"]
-  }
-
-async function createEvent(){
+app.post('/speaker', async (req, res) => {
 
     try {
 
-        const newEvent = new Event(event)
+        const speaker = await createSpeaker(req.body)
+
+        if(!speaker){
+
+            res.status(404).json({error: "Failed to add speaker"})
+
+        }else{
+
+            res.status(201).json({message: "Speaker added successfully", newSpeaker: speaker})
+        }
+        
+    } catch (error) {
+
+        res.status(500).json({error: "Failed to add Speaker"})
+        
+    }
+})
+
+
+
+// const event = {
+//     "title": "AI in 2025: The Future Ahead",
+//     "eventType": "Online",
+//     "eventTags": ["AI", "technology"],
+//     "description": "A virtual panel on emerging AI trends.",
+//     "price": 20,
+//     "startDateAndTime": "July 5, 2025, 2:00 PM",
+//     "endDateAndTime": "July 5, 2025, 4:00 PM",
+//     "eventHosted": "Global AI Forum",
+//     "eventImageUrl": "https://example.com/images/ai-future.jpg",
+//     "speaker": ["68550682f128d62b9c0e3827", "685506925e2860cc10d64b1d"]
+//   }
+
+async function createEvent(newevent){
+
+    try {
+
+        const newEvent = new Event(newevent)
 
         await newEvent.save()
+
+        return newEvent
         
     } catch (error) {
 
@@ -79,6 +109,28 @@ async function createEvent(){
 }
 
 // createEvent()
+
+app.post('/events', async (req, res) => {
+
+    try {
+
+        const event = await createEvent(req.body)
+
+        if(!event){
+
+            res.status(404).json({error: "Failed to add event"})
+
+        }else{
+
+            res.status(201).json({message: "Event added successfully", newEvent: event})
+        }
+        
+    } catch (error) {
+
+        res.status(500).json({error: "Failed to add event"})
+        
+    }
+})
 
 
 //read all events
@@ -118,6 +170,22 @@ app.get('/events', async (req, res) => {
         
     }
 })
+
+async function updateEvent(eventId, dataToUpdate){
+
+    try {
+
+        const updatedEvent = await Event.findByIdAndUpdate(eventId, dataToUpdate, {new: true, runValidators: true})
+
+        return updatedEvent
+        
+    } catch (error) {
+        
+    }
+}
+
+updateEvent("685506ef386cf0229a7df599", {location: "Manyata Tech Park, Bangaluru"})
+
 
 app.listen(PORT, () => {
 
